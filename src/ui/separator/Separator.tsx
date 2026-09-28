@@ -1,5 +1,14 @@
+import { clsx } from 'clsx';
+
+import type { CSSProperties } from 'react';
+
 import styles from './index.module.scss';
 
-export const Separator = (): React.JSX.Element => {
-  return <div className={styles.separator}></div>;
+type SeparatorProps = {
+  className?: string;
+  style?: CSSProperties;
+};
+
+export const Separator = ({ className, style }: SeparatorProps): React.JSX.Element => {
+  return <div className={clsx(styles.separator, className)} style={style} />;
 };

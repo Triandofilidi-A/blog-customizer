@@ -20,19 +20,24 @@ import type { ArticleStateType, OptionType } from 'src/constants/articleProps.ts
 import styles from './ArticleParamsForm.module.scss';
 
 type ArticleParamsFormProps = {
-  onApply: (settings: ArticleStateType) => void;
-  isOpen: boolean;
-  onToggle: () => void;
+  onApplySettings: (settings: ArticleStateType) => void;
 };
 
 export const ArticleParamsForm = ({
-  onApply,
-  isOpen,
-  onToggle,
+  onApplySettings,
 }: ArticleParamsFormProps): React.JSX.Element => {
   const [draftSettings, setDraftSettings] =
     useState<ArticleStateType>(defaultArticleState);
+
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+
   const containerRef = useRef<HTMLElement>(null);
+
+  const arrowRef = useRef<HTMLDivElement>(null);
+
+  const handleToggle = (): void => {
+    setIsFormOpen((prev) => !prev);
+  };
 
   const handleChange =
     (field: keyof ArticleStateType): ((option: OptionType) => void) =>
@@ -43,31 +48,27 @@ export const ArticleParamsForm = ({
       }));
     };
 
-  const handleApplyClick = (): void => {
-    onApply(draftSettings);
-  };
-
-  const handleResetClick = (): void => {
-    setDraftSettings(defaultArticleState);
-    onApply(defaultArticleState);
-  };
-
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
+    onApplySettings(draftSettings);
+  };
+
+  const handleFormReset = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    setDraftSettings(defaultArticleState);
+    onApplySettings(defaultArticleState);
   };
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isFormOpen) return;
 
     const handleOutsideClick = (event: MouseEvent): void => {
       const target = event.target as Node;
       const isClickInsideForm = containerRef.current?.contains(target);
-      const isClickInsideArrow = (target as HTMLElement).closest(
-        '[aria-label="Открыть/Закрыть форму параметров статьи"]'
-      );
+      const isClickInsideArrow = arrowRef.current?.contains(target);
 
       if (!isClickInsideForm && !isClickInsideArrow) {
-        onToggle();
+        setIsFormOpen(false);
       }
     };
 
@@ -75,17 +76,23 @@ export const ArticleParamsForm = ({
     return (): void => {
       window.removeEventListener('mousedown', handleOutsideClick);
     };
-  }, [isOpen, onToggle]);
+  }, [isFormOpen]);
 
   return (
     <>
-      <ArrowButton isOpen={isOpen} onClick={onToggle} />
+      <div ref={arrowRef}>
+        <ArrowButton isOpen={isFormOpen} onClick={handleToggle} />
+      </div>
 
       <aside
-        className={clsx(styles.container, { [styles.container_open]: isOpen })}
+        className={clsx(styles.container, { [styles.container_open]: isFormOpen })}
         ref={containerRef}
       >
-        <form className={styles.form} onSubmit={handleFormSubmit}>
+        <form
+          className={styles.form}
+          onSubmit={handleFormSubmit}
+          onReset={handleFormReset}
+        >
           <div className={styles.header}>
             <Text size={31} weight={800} uppercase>
               ЗАДАЙТЕ ПАРАМЕТРЫ
@@ -136,8 +143,8 @@ export const ArticleParamsForm = ({
           />
 
           <div className={styles.bottomContainer}>
-            <Button title="СБРОСИТЬ" type="clear" onClick={handleResetClick} />
-            <Button title="ПРИМЕНИТЬ" type="apply" onClick={handleApplyClick} />
+            <Button title="СБРОСИТЬ" htmlType="reset" type="clear" />
+            <Button title="ПРИМЕНИТЬ" htmlType="submit" type="apply" />
           </div>
         </form>
       </aside>

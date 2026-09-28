@@ -1,22 +1,18 @@
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import { ArticleParamsForm } from 'src/components/article-params-form';
+import { Article } from 'src/components/article/Article.tsx';
 import { defaultArticleState } from 'src/constants/articleProps.ts';
 
-import { Article } from '../article/Article';
-
-import type { ArticleStateType } from '@/constants/articleProps';
 import type { CSSProperties } from 'react';
+import type { ArticleStateType } from 'src/constants/articleProps';
 
 import styles from './app.module.scss';
 
 export const App = (): React.JSX.Element => {
   const [appliedSettings, setAppliedSettings] =
     useState<ArticleStateType>(defaultArticleState);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const handleToggleSidebar = (): void => {
-    setIsSidebarOpen((prev) => !prev);
-  };
+
   const handleApplySettings = (newSettings: ArticleStateType): void => {
     setAppliedSettings(newSettings);
   };
@@ -34,11 +30,7 @@ export const App = (): React.JSX.Element => {
         } as CSSProperties
       }
     >
-      <ArticleParamsForm
-        onApply={handleApplySettings}
-        isOpen={isSidebarOpen}
-        onToggle={handleToggleSidebar}
-      />
+      <ArticleParamsForm onApplySettings={handleApplySettings} />
       <Article />
     </main>
   );
